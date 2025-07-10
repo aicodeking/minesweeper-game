@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minesweeper Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <h1>Minesweeper</h1>
+        <div class="game-info">
+            <div class="mines-count">Mines: <span id="mines-left">10</span></div>
+            <button id="reset-btn">😊</button>
+            <div class="timer">Time: <span id="timer">000</span></div>
+        </div>
+        <div class="game-board" id="game-board"></div>
+        <div class="difficulty">
+            <button onclick="setDifficulty('easy')">Easy (9x9)</button>
+            <button onclick="setDifficulty('medium')">Medium (16x16)</button>
+            <button onclick="setDifficulty('hard')">Hard (30x16)</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+    <p>created with Comet Assistant</p>
+</body>
+</html>
