@@ -13,15 +13,51 @@
             <div class="mines-count">Mines: <span id="mines-left">10</span></div>
             <button id="reset-btn">😊</button>
             <div class="timer">Time: <span id="timer">000</span></div>
+            <div class="theme-switcher">
+                <input type="checkbox" id="theme-toggle" class="theme-toggle-checkbox">
+                <label for="theme-toggle" class="theme-toggle-label"></label>
+            </div>
         </div>
         <div class="game-board" id="game-board"></div>
         <div class="difficulty">
-            <button onclick="setDifficulty('easy')">Easy (9x9)</button>
-            <button onclick="setDifficulty('medium')">Medium (16x16)</button>
-            <button onclick="setDifficulty('hard')">Hard (30x16)</button>
+            <button data-level="easy">Easy (9x9)</button>
+            <button data-level="medium">Medium (16x16)</button>
+            <button data-level="hard">Hard (30x16)</button>
+            <button data-level="custom">Custom</button>
+        </div>
+        <div class="high-scores">
+            <h2>High Scores</h2>
+            <ul>
+                <li>Easy: <span id="highscore-easy">--</span>s</li>
+                <li>Medium: <span id="highscore-medium">--</span>s</li>
+                <li>Hard: <span id="highscore-hard">--</span>s</li>
+            </ul>
         </div>
     </div>
     <script src="script.js"></script>
     <p>created with Comet Assistant</p>
+
+    <div id="custom-difficulty-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Custom Difficulty</h2>
+            <div class="custom-input">
+                <label for="custom-rows">Rows:</label>
+                <input type="number" id="custom-rows" value="9" min="5" max="30">
+            </div>
+            <div class="custom-input">
+                <label for="custom-cols">Columns:</label>
+                <input type="number" id="custom-cols" value="9" min="5" max="50">
+            </div>
+            <div class="custom-input">
+                <label for="custom-mines">Mines:</label>
+                <input type="number" id="custom-mines" value="10" min="1">
+            </div>
+            <div id="custom-error-message" class="error-message"></div>
+            <div class="modal-buttons">
+                <button id="start-custom-game-btn">Start Game</button>
+                <button id="cancel-custom-game-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
