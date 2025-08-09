@@ -12,6 +12,7 @@ class Minesweeper {
         this.minesCount = 10;
         this.rows = 9;
         this.cols = 9;
+        this.difficulty = 'easy'; // Default difficulty
         this.timer = 0;
         this.timerInterval = null;
         
@@ -204,9 +205,17 @@ class Minesweeper {
     gameOver(won) {
         this.gameActive = false;
         this.stopTimer();
-        
+        const gameContainer = document.querySelector('.game-container');
+
         if (won) {
             this.resetBtn.textContent = '😎';
+            gameContainer.classList.add('game-won');
+
+            const newHighScore = highScoreManager.updateScore(this.difficulty, this.timer);
+            if (newHighScore) {
+                highScoreManager.displayScores();
+            }
+
             // Flag all mines
             for (const [row, col] of this.mineLocations) {
                 if (!this.board[row][col].isFlagged) {
@@ -215,6 +224,7 @@ class Minesweeper {
             }
         } else {
             this.resetBtn.textContent = '😵';
+            gameContainer.classList.add('game-lost');
             // Reveal all mines
             for (const [row, col] of this.mineLocations) {
                 this.board[row][col].isRevealed = true;
@@ -231,6 +241,9 @@ class Minesweeper {
         this.resetBtn.textContent = '😊';
         this.stopTimer();
         this.initializeGame();
+
+        const gameContainer = document.querySelector('.game-container');
+        gameContainer.classList.remove('game-won', 'game-lost');
     }
     
     startTimer() {
@@ -256,6 +269,13 @@ class Minesweeper {
 // Difficulty settings
 function setDifficulty(level) {
     let rows, cols, mines;
+
+    game.difficulty = level;
+
+    if (level === 'custom') {
+        document.getElementById('custom-difficulty-modal').style.display = 'flex';
+        return;
+    }
     
     switch (level) {
         case 'easy':
@@ -281,10 +301,111 @@ function setDifficulty(level) {
     game.resetGame();
 }
 
+const highScoreManager = {
+    getScores: () => {
+        const scores = localStorage.getItem('minesweeperHighScores');
+        return scores ? JSON.parse(scores) : { easy: Infinity, medium: Infinity, hard: Infinity };
+    },
+    saveScores: (scores) => {
+        localStorage.setItem('minesweeperHighScores', JSON.stringify(scores));
+    },
+    updateScore: (level, newTime) => {
+        if (level === 'custom' || !level) return false;
+        const scores = highScoreManager.getScores();
+        if (newTime < scores[level]) {
+            scores[level] = newTime;
+            highScoreManager.saveScores(scores);
+            return true;
+        }
+        return false;
+    },
+    displayScores: () => {
+        const scores = highScoreManager.getScores();
+        document.getElementById('highscore-easy').textContent = scores.easy === Infinity ? '--' : scores.easy;
+        document.getElementById('highscore-medium').textContent = scores.medium === Infinity ? '--' : scores.medium;
+        document.getElementById('highscore-hard').textContent = scores.hard === Infinity ? '--' : scores.hard;
+    }
+};
+
 // Initialize game when page loads
 let game;
 document.addEventListener('DOMContentLoaded', () => {
     game = new Minesweeper();
+    highScoreManager.displayScores();
+
+    // Event listeners
+    const themeToggle = document.getElementById('theme-toggle');
+    const body = document.body;
+
+    themeToggle.addEventListener('change', () => {
+        if (themeToggle.checked) {
+            body.classList.add('dark-mode');
+            localStorage.setItem('theme', 'dark-mode');
+        } else {
+            body.classList.remove('dark-mode');
+            localStorage.setItem('theme', 'light-mode');
+        }
+    });
+
+    // On page load, check for saved theme preference
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark-mode') {
+        body.classList.add('dark-mode');
+        themeToggle.checked = true;
+    }
+
+    // Difficulty buttons
+    document.querySelector('.difficulty').addEventListener('click', (e) => {
+        if (e.target.tagName === 'BUTTON') {
+            const level = e.target.dataset.level;
+            if (level) {
+                setDifficulty(level);
+            }
+        }
+    });
+
+    // Custom difficulty modal
+    const customModal = document.getElementById('custom-difficulty-modal');
+    const startCustomBtn = document.getElementById('start-custom-game-btn');
+    const cancelCustomBtn = document.getElementById('cancel-custom-game-btn');
+    const errorMessage = document.getElementById('custom-error-message');
+
+    cancelCustomBtn.addEventListener('click', () => {
+        customModal.style.display = 'none';
+        errorMessage.textContent = '';
+    });
+
+    startCustomBtn.addEventListener('click', () => {
+        const rowsInput = document.getElementById('custom-rows');
+        const colsInput = document.getElementById('custom-cols');
+        const minesInput = document.getElementById('custom-mines');
+
+        const rows = parseInt(rowsInput.value);
+        const cols = parseInt(colsInput.value);
+        const mines = parseInt(minesInput.value);
+
+        // Validation
+        const maxMines = Math.floor((rows * cols) * 0.8);
+        if (isNaN(rows) || isNaN(cols) || isNaN(mines)) {
+            errorMessage.textContent = 'All fields must be valid numbers.';
+            return;
+        }
+        if (rows < 5 || rows > 30 || cols < 5 || cols > 50) {
+            errorMessage.textContent = 'Rows (5-30) or Columns (5-50) are out of range.';
+            return;
+        }
+        if (mines < 1 || mines > maxMines) {
+            errorMessage.textContent = `Mines must be between 1 and ${maxMines}.`;
+            return;
+        }
+
+        errorMessage.textContent = '';
+        game.rows = rows;
+        game.cols = cols;
+        game.minesCount = mines;
+        game.resetGame();
+        customModal.style.display = 'none';
+    });
 });
 
 // created with Comet Assistant
